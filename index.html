@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Three Money Systems — Year-by-Year Distribution Model</title>
+<style>
+:root{
+  --bg:#eef2f5;
+  --panel:#ffffff;
+  --ink:#182230;
+  --muted:#657286;
+  --line:#d6dee8;
+  --navy:#17324d;
+  --bank:#a62c2b;
+  --gov:#22252a;
+  --community:#19764c;
+  --reference:#2f6fb0;
+  --soft:#f7f9fb;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  color:var(--ink);
+  background:var(--bg);
+}
+header{
+  background:var(--navy);
+  color:white;
+  padding:18px 24px;
+}
+header h1{margin:0;font-size:25px}
+header p{margin:7px 0 0;color:#dbe7f2;font-size:14px;line-height:1.4}
+.wrap{max-width:1500px;margin:0 auto;padding:18px}
+.inputs{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(145px,1fr));
+  gap:12px;
+  background:white;
+  padding:15px;
+  border:1px solid var(--line);
+  border-radius:14px;
+}
+.input label{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+  margin-bottom:6px;
+}
+.input input{
+  width:100%;
+  padding:9px 10px;
+  border:1px solid #c8d2de;
+  border-radius:8px;
+  font-size:15px;
+}
+.controls{
+  margin:14px 0;
+  background:white;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px 15px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.year{
+  font-size:24px;
+  font-weight:800;
+  margin-right:auto;
+}
+button{
+  border:none;
+  border-radius:9px;
+  padding:10px 16px;
+  font-size:14px;
+  font-weight:800;
+  cursor:pointer;
+}
+.next{background:#245fa4;color:white}
+.reset{background:#e9eef4;color:#27384b}
+button:disabled{opacity:.4;cursor:not-allowed}
+.reference-box{
+  background:#edf5ff;
+  border:1px solid #bfd5ec;
+  padding:8px 12px;
+  border-radius:9px;
+  font-size:13px;
+}
+.reference-box b{color:var(--reference)}
+.systems{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+.system{
+  background:white;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:16px;
+  min-width:0;
+}
+.system h2{margin:0 0 4px;font-size:20px}
+.system .desc{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.45;
+  min-height:53px;
+}
+.thermos{
+  height:370px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:13px;
+  align-items:end;
+  margin:18px 0 12px;
+  padding:0 6px;
+  position:relative;
+}
+.reference-line{
+  position:absolute;
+  left:0;right:0;
+  border-top:2px dashed var(--reference);
+  pointer-events:none;
+}
+.reference-label{
+  position:absolute;
+  right:0;
+  transform:translateY(-105%);
+  color:var(--reference);
+  background:white;
+  padding-left:5px;
+  font-size:10px;
+  font-weight:700;
+}
+.thermo{
+  height:330px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  align-items:center;
+}
+.value{
+  font-size:13px;
+  font-weight:800;
+  margin-bottom:6px;
+  text-align:center;
+  min-height:32px;
+}
+.tube{
+  width:60px;
+  height:270px;
+  background:#edf1f5;
+  border:2px solid #aeb9c5;
+  border-radius:28px 28px 12px 12px;
+  padding:5px;
+  display:flex;
+  align-items:flex-end;
+  position:relative;
+  overflow:hidden;
+}
+.fill{
+  width:100%;
+  min-height:0;
+  border-radius:20px 20px 7px 7px;
+  transition:height .35s ease;
+}
+.fill.bank{background:var(--bank)}
+.fill.gov{background:var(--gov)}
+.fill.community{background:var(--community)}
+.tlabel{
+  margin-top:7px;
+  font-size:12px;
+  font-weight:800;
+  text-align:center;
+}
+.percent{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:2px;
+  text-align:center;
+}
+.details{
+  border-top:1px solid var(--line);
+  padding-top:10px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px 12px;
+}
+.detail{
+  background:var(--soft);
+  border-radius:8px;
+  padding:8px;
+}
+.detail small{
+  display:block;
+  color:var(--muted);
+  font-weight:700;
+  font-size:10px;
+}
+.detail b{display:block;margin-top:3px;font-size:14px}
+
+.intro-screen{
+  background:white;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:22px;
+  margin-bottom:16px;
+}
+.intro-screen h2{margin:0 0 8px;font-size:24px}
+.intro-screen h3{margin:20px 0 8px;font-size:18px}
+.intro-screen p{line-height:1.55;margin:9px 0}
+.kells-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-top:16px;
+}
+.kells-box{
+  background:var(--soft);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px;
+}
+.kells-box h3{margin:0 0 8px}
+.kells-box ul{margin:8px 0 0 20px;padding:0}
+.kells-box li{margin:8px 0;line-height:1.4}
+.truth{border-left:5px solid var(--community)}
+.conventional{border-left:5px solid var(--bank)}
+.source-note{
+  margin-top:16px;
+  padding:11px 13px;
+  border-radius:10px;
+  background:#eef6ff;
+  border:1px solid #c6d9ef;
+  font-size:12px;
+  line-height:1.45;
+}
+.enter-model{
+  margin-top:18px;
+  display:flex;
+  justify-content:flex-end;
+}
+.enter-model button{background:#245fa4;color:white}
+.model-area.hidden{display:none}
+@media(max-width:900px){.kells-grid{grid-template-columns:1fr}}
+
+.note{
+  margin-top:15px;
+  background:#fff8df;
+  border:1px solid #ead997;
+  border-radius:11px;
+  padding:11px 13px;
+  font-size:12px;
+  line-height:1.5;
+}
+.legend{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-top:8px;
+  color:#536174;
+  font-size:11px;
+}
+.swatch{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:4px}
+@media(max-width:1050px){
+  .systems{grid-template-columns:1fr}
+  .inputs{grid-template-columns:1fr 1fr}
+  .system .desc{min-height:0}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Three Money Systems — Distribution Model</h1>
+  <p>Step through one year at a time and compare how value accumulates with the Bank, Government and Community.</p>
+</header>
+
+<div class="wrap">
+  <section class="intro-screen" id="introScreen">
+    <h2>How Money Actually Works</h2>
+    <p>
+      This model uses the monetary framework set out by Stuart Kells in <i>Fragile Prosperity</i>.
+      The propositions below are treated as the operating assumptions of the simulation.
+    </p>
+
+    <div class="kells-grid">
+      <div class="kells-box conventional">
+        <h3>The conventional story Kells rejects</h3>
+        <ul>
+          <li>Money is treated as an official, durable unit that circulates through the economy.</li>
+          <li>Governments are assumed to collect taxes, hold that money, and then use it to fund spending.</li>
+          <li>Government deficits are assumed to inject new money equal to the gap between spending and taxation.</li>
+          <li>Banks are assumed to lend out deposits received from savers.</li>
+          <li>The banking system is described through a loan multiplier or credit multiplier.</li>
+          <li>A fraction of deposits is assumed to be held as reserves, giving rise to the conventional fractional-reserve story.</li>
+          <li>Central banks are assumed to control the money supply by changing the quantity of reserves.</li>
+          <li>Inflation is treated as having many possible causes, with official interest rates used as the principal tool for suppressing demand.</li>
+        </ul>
+      </div>
+
+      <div class="kells-box truth">
+        <h3>Monetary rules used as truth in this model</h3>
+        <ul>
+          <li>Bank money, created as contractual ledger-based IOUs, is the dominant form of money in the economy.</li>
+          <li>Banks create deposits when they make loans; they do not first obtain deposits and then lend those deposits out.</li>
+          <li>Bank lending therefore creates new money.</li>
+          <li>Bank reserves are used mainly for settlement within the banking system and do not operate as a simple quantitative constraint on lending.</li>
+          <li>Central banks do not directly control the quantity of bank money by controlling reserves.</li>
+          <li>Taxation at the national level removes liquidity from the economy, mainly by extinguishing ledger-based bank-money balances.</li>
+          <li>Where bank-created money is directed matters for inflation, asset prices, productivity and wealth distribution.</li>
+          <li>In Australia, residential-property lending has been a major source of bank-created money, so property prices are not independent of the credit-creation process.</li>
+          <li>Financial regulation has concentrated on prudential safety while giving insufficient attention to the economy-wide balance between productive and unproductive lending.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>What the Three Money Systems model tests</h3>
+    <p>
+      The simulation holds the initial act of money creation constant and changes what happens afterwards.
+      It measures how much value accumulates with the <b>Bank</b>, <b>Government</b> and <b>Community</b>
+      under three different rule sets.
+    </p>
+    <p>
+      The central question is: <b>after new money has created an asset, who ultimately receives the value generated by the financing and by the asset?</b>
+    </p>
+
+    <div class="source-note">
+      Source basis: Stuart Kells, <i>Fragile Prosperity</i>, from the photographed pages supplied with this model.
+      The wording above is a condensed paraphrase of those pages and is used here as the model's foundational monetary framework.
+    </div>
+
+    <div class="enter-model">
+      <button id="enterModelBtn">Enter the Three Money Systems Model →</button>
+    </div>
+  </section>
+
+  <div class="model-area hidden" id="modelArea">
+  <section class="inputs">
+    <div class="input">
+      <label>Initial investment / community asset ($)</label>
+      <input id="investment" type="number" min="1" step="1000" value="100000">
+    </div>
+    <div class="input">
+      <label>System 1 interest rate (%)</label>
+      <input id="interest" type="number" min="0" step="0.1" value="6">
+    </div>
+    <div class="input">
+      <label>Systems 2 & 3 bank fee rate (%)</label>
+      <input id="fee" type="number" min="0" step="0.1" value="2">
+    </div>
+    <div class="input">
+      <label>Years</label>
+      <input id="years" type="number" min="1" step="1" value="10">
+    </div>
+    <div class="input">
+      <label>Profit on money invested (%)</label>
+      <input id="profit" type="number" min="0" step="0.1" value="10">
+    </div>
+  </section>
+
+  <section class="controls">
+    <div class="year">Year <span id="yearNo">0</span></div>
+    <div class="reference-box">
+      Thermometer reference: <b id="referenceText">$100,000 = 100%</b>
+    </div>
+    <button class="reset" id="resetBtn">Reset</button>
+    <button class="next" id="nextBtn">Next Year →</button>
+  </section>
+
+  <section class="systems">
+    <article class="system">
+      <h2>1. Interest Added</h2>
+      <div class="desc">
+        Interest is calculated on money owed, added to the amount owing, and interest is then calculated again for the repayment allocation and tax calculation.
+      </div>
+      <div class="thermos">
+        <div class="reference-line" id="ref1"><span class="reference-label">Initial community capital = 100%</span></div>
+        <div class="thermo">
+          <div class="value" id="s1BankVal">$0</div>
+          <div class="tube"><div class="fill bank" id="s1BankBar"></div></div>
+          <div class="tlabel">Bank</div>
+          <div class="percent" id="s1BankPct">0%</div>
+        </div>
+        <div class="thermo">
+          <div class="value" id="s1GovVal">$0</div>
+          <div class="tube"><div class="fill gov" id="s1GovBar"></div></div>
+          <div class="tlabel">Government</div>
+          <div class="percent" id="s1GovPct">0%</div>
+        </div>
+        <div class="thermo">
+          <div class="value" id="s1CommunityVal">$100,000</div>
+          <div class="tube"><div class="fill community" id="s1CommunityBar"></div></div>
+          <div class="tlabel">Community</div>
+          <div class="percent" id="s1CommunityPct">100%</div>
+        </div>
+      </div>
+      <div class="details">
+        <div class="detail"><small>Money still owed</small><b id="s1Owed">$100,000</b></div>
+        <div class="detail"><small>Annual repayment</small><b id="s1Payment">$13,587</b></div>
+        <div class="detail"><small>Interest added this year</small><b id="s1InterestAdded">$0</b></div>
+        <div class="detail"><small>Interest used for tax this year</small><b id="s1TaxBase">$0</b></div>
+        <div class="detail"><small>Profit produced this year</small><b id="s1Profit">$0</b></div>
+        <div class="detail"><small>Profit reinvested</small><b>No</b></div>
+      </div>
+    </article>
+
+    <article class="system">
+      <h2>2. Interest Not Added</h2>
+      <div class="desc">
+        The bank charges a fee on money still owed. The repayment reduces the amount owed. The bank takes its fee and the remainder of the repayment goes to Government.
+      </div>
+      <div class="thermos">
+        <div class="reference-line" id="ref2"><span class="reference-label">Initial community capital = 100%</span></div>
+        <div class="thermo">
+          <div class="value" id="s2BankVal">$0</div>
+          <div class="tube"><div class="fill bank" id="s2BankBar"></div></div>
+          <div class="tlabel">Bank</div>
+          <div class="percent" id="s2BankPct">0%</div>
+        </div>
+        <div class="thermo">
+          <div class="value" id="s2GovVal">$0</div>
+          <div class="tube"><div class="fill gov" id="s2GovBar"></div></div>
+          <div class="tlabel">Government</div>
+          <div class="percent" id="s2GovPct">0%</div>
+        </div>
+        <div class="thermo">
+          <div class="value" id="s2CommunityVal">$100,000</div>
+          <div class="tube"><div class="fill community" id="s2CommunityBar"></div></div>
+          <div class="tlabel">Community</div>
+          <div class="percent" id="s2CommunityPct">100%</div>
+        </div>
+      </div>
+      <div class="details">
+        <div class="detail"><small>Money still owed</small><b id="s2Owed">$100,000</b></div>
+        <div class="detail"><small>Annual repayment</small><b id="s2Payment">$10,000</b></div>
+        <div class="detail"><small>Bank fee this year</small><b id="s2Fee">$0</b></div>
+        <div class="detail"><small>Repayment to Government this year</small><b id="s2GovRepay">$0</b></div>
+        <div class="detail"><small>Profit produced this year</small><b id="s2Profit">$0</b></div>
+        <div class="detail"><small>Profit reinvested</small><b>No</b></div>
+      </div>
+    </article>
+
+    <article class="system">
+      <h2>3. Money Reinvested</h2>
+      <div class="desc">
+        The bank takes its fee from the repayment. The balance of the repayment is reinvested by the Community. Profit on community investment is also reinvested and increases future profit, but does not change the loan.
+      </div>
+      <div class="thermos">
+        <div class="reference-line" id="ref3"><span class="reference-label">Initial community capital = 100%</span></div>
+        <div class="thermo">
+          <div class="value" id="s3BankVal">$0</div>
+          <div class="tube"><div class="fill bank" id="s3BankBar"></div></div>
+          <div class="tlabel">Bank</div>
+          <div class="percent" id="s3BankPct">0%</div>
+        </div>
+        <div class="thermo">
+          <div class="value" id="s3GovVal">$0</div>
+          <div class="tube"><div class="fill gov" id="s3GovBar"></div></div>
+          <div class="tlabel">Government</div>
+          <div class="percent" id="s3GovPct">0%</div>
+        </div>
+        <div class="thermo">
+          <div class="value" id="s3CommunityVal">$100,000</div>
+          <div class="tube"><div class="fill community" id="s3CommunityBar"></div></div>
+          <div class="tlabel">Community</div>
+          <div class="percent" id="s3CommunityPct">100%</div>
+        </div>
+      </div>
+      <div class="details">
+        <div class="detail"><small>Money still owed</small><b id="s3Owed">$100,000</b></div>
+        <div class="detail"><small>Annual repayment</small><b id="s3Payment">$10,000</b></div>
+        <div class="detail"><small>Bank fee this year</small><b id="s3Fee">$0</b></div>
+        <div class="detail"><small>Repayment reinvested this year</small><b id="s3RepaidReinvest">$0</b></div>
+        <div class="detail"><small>Profit reinvested this year</small><b id="s3Profit">$0</b></div>
+        <div class="detail"><small>Total community capital in use</small><b id="s3Capital">$100,000</b></div>
+      </div>
+    </article>
+  </section>
+
+  <div class="note">
+    <b>Calibration:</b> the initial investment is the common 100% reference for all thermometers. Every Bank, Government and Community thermometer uses the same dollar scale at each year, so their heights are directly comparable. The scale expands only when a value grows above the original community capital; the dashed line continues to mark the original 100% reference.
+    <div class="legend">
+      <span><span class="swatch" style="background:var(--bank)"></span>Bank</span>
+      <span><span class="swatch" style="background:var(--gov)"></span>Government</span>
+      <span><span class="swatch" style="background:var(--community)"></span>Community capital in use</span>
+    </div>
+  </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+$('enterModelBtn').addEventListener('click',()=>{
+  $('introScreen').style.display='none';
+  $('modelArea').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+const money = x => new Intl.NumberFormat('en-AU',{
+  style:'currency',currency:'AUD',maximumFractionDigits:0
+}).format(Number.isFinite(x)?x:0);
+
+let state;
+
+function getInputs(){
+  return {
+    P: Math.max(1, Number($('investment').value)||100000),
+    r1: Math.max(0, Number($('interest').value)||0)/100,
+    fee: Math.max(0, Number($('fee').value)||0)/100,
+    years: Math.max(1, Math.round(Number($('years').value)||10)),
+    profit: Math.max(0, Number($('profit').value)||0)/100
+  };
+}
+
+function annuityPayment(P,r,n){
+  if(r===0) return P/n;
+  return P*r/(1-Math.pow(1+r,-n));
+}
+
+function resetModel(){
+  const i=getInputs();
+  state={
+    year:0,
+    inputs:i,
+    s1:{
+      owed:i.P, bank:0, gov:0, community:i.P,
+      interestAdded:0, taxBase:0, profitYear:0,
+      payment:annuityPayment(i.P,i.r1,i.years)
+    },
+    s2:{
+      owed:i.P, bank:0, gov:0, community:i.P,
+      feeYear:0, govRepayYear:0, profitYear:0,
+      payment:i.P/i.years
+    },
+    s3:{
+      owed:i.P, bank:0, gov:0, community:i.P,
+      feeYear:0, reinvestYear:0, profitYear:0,
+      payment:i.P/i.years
+    }
+  };
+  render();
+}
+
+function nextYear(){
+  const {r1,fee,years,profit}=state.inputs;
+  if(state.year>=years) return;
+  state.year++;
+
+  // SYSTEM 1 — rules taken from spreadsheet.
+  {
+    let s=state.s1;
+    const interestOnOwed=s.owed*r1;
+    const afterAddingInterest=s.owed+interestOnOwed;
+    const interestForRepaymentAndTax=afterAddingInterest*r1;
+    const principalPart=Math.max(0,s.payment-interestForRepaymentAndTax);
+
+    s.interestAdded=interestOnOwed;
+    s.taxBase=interestForRepaymentAndTax;
+    s.owed=Math.max(0,afterAddingInterest-principalPart);
+    s.bank+=s.payment;
+    s.gov+=interestForRepaymentAndTax*0.30;
+    s.profitYear=s.community*profit;
+    // Spreadsheet shows no increase in money invested for this system.
+  }
+
+  // SYSTEM 2 — fee, no interest added, repayment balance goes to Government.
+  {
+    let s=state.s2;
+    const repayment=Math.min(s.payment,s.owed);
+    const bankFee=s.owed*fee;
+    const govFromRepayment=Math.max(0,repayment-bankFee);
+
+    s.feeYear=bankFee;
+    s.govRepayYear=govFromRepayment;
+    s.owed=Math.max(0,s.owed-repayment);
+    s.bank+=bankFee;
+    s.gov+=govFromRepayment+(bankFee*0.30);
+    s.profitYear=s.community*profit;
+    // Spreadsheet shows no increase in money invested for this system.
+  }
+
+  // SYSTEM 3 — repayment balance and profit both reinvested.
+  {
+    let s=state.s3;
+    const repayment=Math.min(s.payment,s.owed);
+    const bankFee=s.owed*fee;
+    const reinvestFromRepayment=Math.max(0,repayment-bankFee);
+    const profitThisYear=s.community*profit;
+
+    s.feeYear=bankFee;
+    s.reinvestYear=reinvestFromRepayment;
+    s.profitYear=profitThisYear;
+    s.owed=Math.max(0,s.owed-repayment);
+    s.bank+=bankFee;
+    s.gov+=bankFee*0.30;
+    s.community+=reinvestFromRepayment+profitThisYear;
+  }
+
+  render();
+}
+
+function setThermo(prefix,value,baseline,scale){
+  $(prefix+'Val').textContent=money(value);
+  $(prefix+'Pct').textContent=((value/baseline)*100).toFixed(1)+'% of initial community capital';
+  $(prefix+'Bar').style.height=Math.max(0,Math.min(100,(value/scale)*100))+'%';
+}
+
+function render(){
+  const P=state.inputs.P;
+  $('yearNo').textContent=state.year;
+  $('referenceText').textContent=money(P)+' = 100%';
+  $('nextBtn').disabled=state.year>=state.inputs.years;
+
+  const vals=[
+    state.s1.bank,state.s1.gov,state.s1.community,
+    state.s2.bank,state.s2.gov,state.s2.community,
+    state.s3.bank,state.s3.gov,state.s3.community
+  ];
+  // All nine thermometers use one common dollar scale.
+  // Keep at least 115% of initial community capital visible.
+  const scale=Math.max(P*1.15,...vals)*1.05;
+  const referenceHeight=(P/scale)*270;
+  ['ref1','ref2','ref3'].forEach(id=>{
+    $(id).style.bottom=(referenceHeight+26)+'px';
+  });
+
+  setThermo('s1Bank',state.s1.bank,P,scale);
+  setThermo('s1Gov',state.s1.gov,P,scale);
+  setThermo('s1Community',state.s1.community,P,scale);
+
+  setThermo('s2Bank',state.s2.bank,P,scale);
+  setThermo('s2Gov',state.s2.gov,P,scale);
+  setThermo('s2Community',state.s2.community,P,scale);
+
+  setThermo('s3Bank',state.s3.bank,P,scale);
+  setThermo('s3Gov',state.s3.gov,P,scale);
+  setThermo('s3Community',state.s3.community,P,scale);
+
+  $('s1Owed').textContent=money(state.s1.owed);
+  $('s1Payment').textContent=money(state.s1.payment);
+  $('s1InterestAdded').textContent=money(state.s1.interestAdded);
+  $('s1TaxBase').textContent=money(state.s1.taxBase);
+  $('s1Profit').textContent=money(state.s1.profitYear);
+
+  $('s2Owed').textContent=money(state.s2.owed);
+  $('s2Payment').textContent=money(state.s2.payment);
+  $('s2Fee').textContent=money(state.s2.feeYear);
+  $('s2GovRepay').textContent=money(state.s2.govRepayYear);
+  $('s2Profit').textContent=money(state.s2.profitYear);
+
+  $('s3Owed').textContent=money(state.s3.owed);
+  $('s3Payment').textContent=money(state.s3.payment);
+  $('s3Fee').textContent=money(state.s3.feeYear);
+  $('s3RepaidReinvest').textContent=money(state.s3.reinvestYear);
+  $('s3Profit').textContent=money(state.s3.profitYear);
+  $('s3Capital').textContent=money(state.s3.community);
+}
+
+$('nextBtn').addEventListener('click',nextYear);
+$('resetBtn').addEventListener('click',resetModel);
+document.querySelectorAll('.inputs input').forEach(el=>{
+  el.addEventListener('change',resetModel);
+});
+resetModel();
+</script>
+</body>
+</html>
